@@ -118,7 +118,13 @@ def main(args):
             if (previous_result is None):
                 trigger_event(report_uri, 'new_song', response)
             else:
-                event = adapter.compare_responses(previous_result, response)
+                try:
+                    event = adapter.compare_responses(previous_result, response)
+                except IndexError:
+                    logging.error('Adapter %s returned IndexError (malformed data?)' % adapter_name)
+                    time.sleep(10)
+                    continue
+
                 if (event is not None):
                     trigger_event(report_uri, event, response)
 
