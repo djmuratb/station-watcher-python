@@ -77,16 +77,22 @@ class IcecastAdapter(AbstractAdapter):
 
 def trigger_event(report_uri, event_name, response):
     logging.info('New event triggered: %s' % event_name)
-    requests.post(report_uri, data=response.text)
+    webhook_response = requests.post(report_uri, data=response.text)
+
+    if (webhook_response.status_code != 200):
+        logging.error('Webhook returned response code %d. Verify API authentication key.' % webhook_response.status_code)
+        time.sleep(15)
     return
 
 def main(args):
     # Set up logging
     root = logging.getLogger()
+    root.name = 'station-watcher'
     root.setLevel(logging.DEBUG)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
+
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
     root.addHandler(ch)
