@@ -58,9 +58,14 @@ def main(args):
             if (previous_result is None):
                 triggerEvent(report_uri, response)
             else:
-                is_changed = adapter.compareResponses(previous_result, response)
-                if (is_changed):
-                    triggerEvent(report_uri, response)
+                try:
+                    is_changed = adapter.compareResponses(previous_result, response)
+                    if (is_changed):
+                        triggerEvent(report_uri, response)
+                except Exception as e:
+                    logging.error('Error processing response: %s' % e)
+                    time.sleep(15)
+                    continue
 
             previous_result = response
         else:
