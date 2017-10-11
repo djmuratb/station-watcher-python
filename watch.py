@@ -64,8 +64,7 @@ def main(args):
                         triggerEvent(report_uri, response)
                 except Exception as e:
                     logging.error('Error processing response: %s' % e)
-                    time.sleep(15)
-                    continue
+                    time.sleep(3)
 
             previous_result = response
         else:
