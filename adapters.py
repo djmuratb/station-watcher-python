@@ -35,16 +35,19 @@ class IcecastAdapter(AbstractAdapter):
         streams = xml.getElementsByTagName('source')
         for stream in streams:
             comparable.append({
-                'title': self._getText(stream.getElementsByTagName('artist')[0].childNodes) + " - " + \
-                         self._getText(stream.getElementsByTagName('title')[0].childNodes),
-                'listeners': int(self._getText(stream.getElementsByTagName('listeners')[0].childNodes))
+                'title': self._getText(stream.getElementsByTagName('artist')) + " - " + \
+                         self._getText(stream.getElementsByTagName('title')),
+                'listeners': int(self._getText(stream.getElementsByTagName('listeners')))
             })
 
         return comparable
 
-    def _getText(self, nodelist):
+    def _getText(self, elements):
         rc = []
-        for node in nodelist:
-            if node.nodeType == node.TEXT_NODE:
-                rc.append(node.data)
+
+        if (elements):
+            for node in elements[0].childNodes:
+                if node.nodeType == node.TEXT_NODE:
+                    rc.append(node.data)
+
         return ''.join(rc)

@@ -4,7 +4,7 @@
 A handy-dandy script that watches radio servers and turns changes into URI webhooks.
 
 Sample usage:
-watch.py shoutcast2 http://shoutcast.url/np.json http://azuracast.url/api
+watch.py shoutcast2 http://shoutcast.url/np.json http://azuracast.url/api station-name
 
 ShoutCast 2 desired URI:
 http://localhost:8000/statistics?json=1
@@ -32,11 +32,14 @@ def main(args):
     root.addHandler(ch)
 
     # Enforce parameters
-    if (args.__len__() != 3):
-        logging.error('Not enough parameters! Usage: %s adapters watch_uri report_uri' % __file__)
+    if (args.__len__() < 3):
+        logging.error('Not enough parameters! Usage: %s adapters watch_uri report_uri station_name' % __file__)
         exit(1)
 
-    adapter_name, watch_uri, report_uri = args
+    adapter_name, watch_uri, report_uri, station_name = args
+
+    if (station_name != ""):
+        root.name = 'station-'+station_name+'-watcher'
 
     # A list of all known adapters
     adapters = {
@@ -52,7 +55,12 @@ def main(args):
     previous_result = None
 
     while True:
-        response = requests.get(watch_uri)
+        try:
+            response = requests.get(watch_uri)
+        except requests.exceptions.ConnectionError as e:
+            logging.error('Connection error for watch URI "%s":%s' % (watch_uri, e))
+            time.sleep(15)
+            continue
 
         if (response.status_code == 200):
             if (previous_result is None):
@@ -63,7 +71,7 @@ def main(args):
                     if (is_changed):
                         triggerEvent(report_uri, response)
                 except Exception as e:
-                    logging.error('Error processing response: %s' % e)
+                    logging.error('Error processing URI "%s": %s' % (watch_uri, e))
                     time.sleep(3)
 
             previous_result = response
