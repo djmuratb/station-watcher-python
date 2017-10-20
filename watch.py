@@ -57,6 +57,7 @@ def main(args):
     while True:
         try:
             response = requests.get(watch_uri)
+            response.encoding = "UTF-8"
         except requests.exceptions.ConnectionError as e:
             logging.error('Connection error for watch URI "%s":%s' % (watch_uri, e))
             time.sleep(15)
@@ -83,7 +84,7 @@ def main(args):
 
 def triggerEvent(report_uri: str, response: Response):
     logging.info('Webhook POST triggered.')
-    webhook_response = requests.post(report_uri, data=response.text)
+    webhook_response = requests.post(report_uri, data=response.text.encode('utf-8'))
 
     if (webhook_response.status_code != 200):
         logging.error('Webhook returned response code %d. Verify API authentication key.' % webhook_response.status_code)
